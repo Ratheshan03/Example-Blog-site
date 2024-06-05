@@ -4,15 +4,16 @@ import PostUser from "@/components/postUser/postUser";
 import { Suspense } from "react";
 import { getPost, getUser } from "@/lib/data";
 
-// const getData = async (slug) => {
-//   const res = await fetch(`https://jsonplaceholder.typicode.com/posts/${slug}`);
+// FETCH DATA WITH AN API
+const getData = async (slug) => {
+  const res = await fetch(`http://localhost:3000/${slug}`);
 
-//   if (!res.ok) {
-//     throw new Error("Something went wrong");
-//   }
+  if (!res.ok) {
+    throw new Error("Something went wrong");
+  }
 
-//   return res.json();
-// };
+  return res.json();
+};
 
 export const generateMetaData = async ({ params }) => {
   const { slug } = params;

@@ -1,10 +1,14 @@
-const AboutPage = () => {
+import styles from "./register.module.css";
+import RegisterForm from "@/components/registerForm/registerForm";
+
+const RegisterPage = () => {
   return (
-    <div>
-      <h1>About</h1>
-      <p>This is the about page</p>
+    <div className={styles.container}>
+      <div className={styles.wrapper}>
+        <RegisterForm />
+      </div>
     </div>
   );
 };
 
-export default AboutPage;
+export default RegisterPage;
