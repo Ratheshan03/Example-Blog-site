@@ -4,37 +4,36 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { connectToDb } from "./utils";
 import { User } from "./models";
 import bcrypt from "bcryptjs";
+import { authConfig } from "./auth.config";
 
 const login = async (credentials) => {
   try {
     connectToDb();
-    const User = await User.findOne({ username: credentials.username });
-    if (!user) {
-      throw new Error("Wrong Credentials - No user found");
-    }
+    const user = await User.findOne({ username: credentials.username });
 
-    const isPasswordValid = await bcrypt.compare(
+    if (!user) throw new Error("Wrong credentials!");
+
+    const isPasswordCorrect = await bcrypt.compare(
       credentials.password,
       user.password
     );
 
-    if (!isPasswordValid) {
-      throw new Error("Wrong Credentials - Wrong Password");
-    }
+    if (!isPasswordCorrect) throw new Error("Wrong credentials!");
 
-    return User;
+    return user;
   } catch (err) {
     console.log(err);
-    return false;
+    throw new Error("Failed to login!");
   }
 };
 
 export const {
   handlers: { GET, POST },
+  auth,
   signIn,
   signOut,
-  auth,
 } = NextAuth({
+  ...authConfig,
   providers: [
     GitHub({
       clientId: process.env.GITHUB_ID,
@@ -45,7 +44,7 @@ export const {
         try {
           const user = await login(credentials);
           return user;
-        } catch (error) {
+        } catch (err) {
           return null;
         }
       },
@@ -56,14 +55,15 @@ export const {
       if (account.provider === "github") {
         connectToDb();
         try {
-          const existingUser = await User.findOne({ email: profile.email });
+          const user = await User.findOne({ email: profile.email });
 
-          if (!existingUser) {
+          if (!user) {
             const newUser = new User({
               username: profile.login,
               email: profile.email,
               image: profile.avatar_url,
             });
+
             await newUser.save();
           }
         } catch (err) {
@@ -73,5 +73,6 @@ export const {
       }
       return true;
     },
+    ...authConfig.callbacks,
   },
 });
